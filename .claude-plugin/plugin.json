@@ -1,0 +1,7 @@
+{
+  "name": "harness",
+  "description": "Spin up a three-agent team (Planner, Evaluator, Generator) to plan AND implement a software feature end-to-end.",
+  "author": {
+    "name": "isaiahbernados"
+  }
+}
