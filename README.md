@@ -6,29 +6,44 @@ Invoke it with `/harness` and describe what you want to build. Three specialized
 
 ## How it works
 
-```
-You ──► /harness "add dark mode to the settings page"
-              │
-              ▼
-        ┌─────────────────────────────────────────────┐
-        │                  Team Lead                   │
-        │  (coordinates agents, monitors progress)     │
-        └──────┬──────────────────────────────────────┘
-               │ spawns
-       ┌───────┼───────────────┐
-       ▼       ▼               ▼
-   Planner  Evaluator      Generator
-      │         │               │
-      │  writes │  reviews      │
-      │  spec ──► spec ─────────► implements
-      │                         │
-      │              grades ◄───┘
-      │                │
-      └────────────────┘
-             │
-             ▼
-     PASS → FEATURE_PLAN.md
-     FAIL → Generator retries (up to 2x)
+```mermaid
+sequenceDiagram
+    actor You
+    participant TL as Team Lead
+    participant P as Planner
+    participant E as Evaluator
+    participant G as Generator
+
+    You->>TL: /harness "add dark mode"
+    TL->>P: spawn
+    TL->>E: spawn
+    TL->>G: spawn
+
+    P->>P: reads codebase, writes spec
+    P-->>E: spec ready (review it)
+    P-->>G: spec ready (wait for approval)
+
+    E->>E: reviews each criterion
+    alt criteria need rewrites
+        E-->>P: flag issues
+        P->>P: revise spec
+        P-->>E: revised spec
+    end
+    E-->>G: spec approved, start implementing
+
+    G->>G: implements + checkpoint commits
+    G-->>E: implementation ready
+
+    E->>E: tests every criterion
+    alt FAIL
+        E-->>G: failed criteria + root causes
+        G->>G: fix and retry (up to 2x)
+        G-->>E: re-submit
+    end
+
+    E-->>TL: verdict + summary
+    TL->>TL: writes FEATURE_PLAN.md
+    TL-->>You: done ✓
 ```
 
 ### The agents
