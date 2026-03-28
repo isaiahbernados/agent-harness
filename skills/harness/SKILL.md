@@ -4,7 +4,7 @@ description: "Spin up a three-agent team (Planner, Evaluator, Generator) to plan
 user-invocable: true
 ---
 
-# Build Feature Skill
+# Agent Harness
 
 Orchestrates a three-agent team:
 
