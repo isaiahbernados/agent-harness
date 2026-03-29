@@ -4,7 +4,19 @@ A Claude Code plugin that spins up a **three-agent team** to plan and implement 
 
 Invoke it with `/harness` and describe what you want to build. Three specialized agents take it from there: one writes a product spec, one reviews it for testability, and one implements it. The evaluator then tests the result and sends it back for fixes if anything fails.
 
-## How it works
+## Skills
+
+| Skill | What it does |
+|-------|-------------|
+| `/harness` | Full end-to-end: spec → review → implement → evaluate |
+| `/spec` | Spec + review only — no code written |
+| `/debug` | Reproduce → diagnose root cause → fix + verify |
+| `/iterate` | Resume a stopped or failed harness run |
+| `/feature-log` | Show all harness and debug runs in the project |
+
+---
+
+## How `/harness` works
 
 ```mermaid
 sequenceDiagram
@@ -92,23 +104,44 @@ Then restart Claude Code. The `/harness` skill will be available in any project.
 
 ## Usage
 
+### `/harness` — build a feature end-to-end
 ```
 /harness add a search bar that filters the product list in real time
-```
-
-```
 /harness build a CSV export button for the reports table
-```
-
-```
 /harness implement OAuth login with GitHub
 ```
+Triggers naturally on "build X", "implement X", "add X to the app".
 
-You can also trigger it naturally — the skill activates on requests like "build X", "implement X", "add X to the app", or "let's make X".
+### `/spec` — write a spec without building
+```
+/spec dark mode for the settings page
+/spec a notification system with email and in-app alerts
+```
+Produces `FEATURE_SPEC.md` + `SPEC_REVIEW.md`. Run `/harness` with the same description when you're ready to implement.
+
+### `/debug` — fix a bug
+```
+/debug the login form submits even when the password field is empty
+/debug search results don't update after the first query
+```
+Writes a failing test, traces the root cause to a specific file and line, then implements and verifies the fix.
+
+### `/iterate` — resume a stopped run
+```
+/iterate feat-dark-mode
+/iterate
+```
+Without a team name, lists all in-progress runs for you to pick from.
+
+### `/feature-log` — project history
+```
+/feature-log
+```
+Renders a table of all harness and debug runs in the current project with their status and summaries.
 
 ### Retry behavior
 
-If the Evaluator finds failures after the first implementation pass, the Generator gets the failed criteria plus root-cause analysis and retries. This happens automatically up to 2 times. If it's still failing after that, Claude will surface the situation and ask how you'd like to proceed.
+If the Evaluator finds failures, the Generator gets the failed criteria plus root-cause analysis and retries automatically — up to 2 times. If still failing, Claude surfaces the situation and asks how you'd like to proceed.
 
 ## Why a spec-first loop?
 
